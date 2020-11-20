@@ -1,8 +1,5 @@
-#!/bin/bash
+#!/bin/bash -x
 
-#set -x
-
-PATH=/usr/sbin:/usr/bin:/sbin:/bin
 TEAMS_USER=teams
 
 # do we need to use sudo to start docker containers?
@@ -14,14 +11,7 @@ USER_GID=$(id -g)
 XSOCK=/tmp/.X11-unix
 XAUTH=/tmp/.docker.xauth
 
-DOWNLOAD_DIR=$(xdg-user-dir DOWNLOAD)
-if [ -z "${DOWNLOAD_DIR}" ]; then
-    DOWNLOAD_DIR="${HOME}/Downloads"
-fi;
-DOCUMENTS_DIR=$(xdg-user-dir DOCUMENTS)
-if [ -z "${DOCUMENTS_DIR}" ]; then
-    DOCUMENTS_DIR="${HOME}/Documents"
-fi;
+DOWNLOAD_DIR="${HOME}/Downloads"
 
 list_commands() {
   echo ""
@@ -37,7 +27,7 @@ cleanup_stopped_teams_instances(){
   for c in $(${SUDO} docker ps -a -q)
   do
     image="$(${SUDO} docker inspect -f {{.Config.Image}} ${c})"
-    if [ "${image}" == "olberger/docker-teams-linux:latest" ]; then
+    if [ "${image}" == "jpigree/docker-teams-linux:latest" ]; then
       running=$(${SUDO} docker inspect -f {{.State.Running}} ${c})
       if [ "${running}" != "true" ]; then
         ${SUDO} docker rm "${c}" >/dev/null
@@ -133,6 +123,4 @@ ${SUDO} docker run -it \
   ${VOLUMES} \
   ${TEAMS_EXTRA_DOCKER_ARGUMENTS} \
   --name teams \
-  olberger/docker-teams-linux:latest ${prog} $@
-
-#>/dev/null
+  jpigree/docker-teams-linux:latest ${prog} $@
